@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111827">
+<title>BUS TIME ARCADE</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --site-primary: #243B63;
+  --site-on-primary: #FFFFFF;
+  --site-secondary: #E8A84A;
+  --site-on-secondary: #172033;
+  --site-background: #F3F5F8;
+  --site-on-background: #172033;
+  --site-font-body: ui-rounded, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  --site-font-heading: ui-rounded, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  --site-heading-scale: 1;
+  --site-spacing-scale: 1;
+  --site-radius-scale: 1;
+  --site-decoration-opacity: 1;
+  --surface: light-dark(#FFFFFF, #1C2637);
+  --surface-2: light-dark(#EDF1F7, #26344A);
+  --text: light-dark(#172033, #F4F6FA);
+  --muted: light-dark(#64748B, #AAB7CA);
+  --line: light-dark(#DCE3ED, #39485F);
+  --good: #24845D;
+  --bad: #C34D54;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--site-background); color: var(--text); font-family: var(--site-font-body); }
+button { font: inherit; cursor: pointer; }
+#app { min-height: 100vh; width: 100%; background-color: var(--site-background); color: var(--site-on-background); overflow: hidden; position: relative; }
+.decor { position: absolute; pointer-events: none; opacity: var(--site-decoration-opacity); border-radius: 50%; filter: blur(1px); }
+.decor.one { width: 230px; height: 230px; background: #E8A84A; opacity: calc(var(--site-decoration-opacity) * .13); top: -90px; right: -75px; }
+.decor.two { width: 170px; height: 170px; background: #5076AE; opacity: calc(var(--site-decoration-opacity) * .12); bottom: 8%; left: -100px; }
+.shell { width: min(100%, 760px); margin: 0 auto; padding: calc(22px * var(--site-spacing-scale)) calc(17px * var(--site-spacing-scale)) 38px; position: relative; z-index: 1; }
+.topline { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--site-primary); }
+.brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 13px; background: var(--site-primary); color: var(--site-on-primary); font-size: 19px; }
+.brand-name { font-family: var(--site-font-heading); font-weight: 900; letter-spacing: .07em; font-size: 14px; }
+.tag { color: var(--muted); font-size: 11px; letter-spacing: .12em; font-weight: 700; }
+.hero { padding: 24px 22px; border-radius: calc(24px * var(--site-radius-scale)); background: var(--site-primary); color: var(--site-on-primary); position: relative; overflow: hidden; box-shadow: 0 12px 28px #14274724; }
+.hero:after { content: ""; position: absolute; width: 190px; height: 190px; border: 1px solid #FFFFFF25; border-radius: 50%; right: -45px; top: -80px; box-shadow: 0 0 0 24px #FFFFFF08, 0 0 0 48px #FFFFFF06; pointer-events: none; }
+.eyebrow { color: #F4C77F; font-size: 11px; font-weight: 800; letter-spacing: .18em; }
+h1 { font-family: var(--site-font-heading); font-size: calc(32px * var(--site-heading-scale)); line-height: 1.12; margin: 9px 0 10px; letter-spacing: -.04em; }
+.hero p { color: #DCE6F5; margin: 0; font-size: 13px; line-height: 1.7; max-width: 420px; }
+.hero-foot { margin-top: 18px; display: flex; align-items: center; gap: 8px; color: #F4C77F; font-size: 11px; font-weight: 700; }
+.pulse { width: 7px; height: 7px; border-radius: 50%; background: #F4C77F; box-shadow: 0 0 0 4px #F4C77F25; }
+.section-head { display: flex; justify-content: space-between; align-items: end; margin: 26px 2px 12px; }
+.section-head h2 { font-size: 16px; margin: 0; color: var(--text); }
+.section-head span { font-size: 11px; color: var(--muted); }
+.games { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+.game-card { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: calc(18px * var(--site-radius-scale)); padding: 16px; min-height: 150px; color: var(--text); transition: transform .15s, border-color .15s; box-shadow: 0 5px 15px #14274708; }
+.game-card:hover { transform: translateY(-2px); border-color: var(--site-secondary); }
+.game-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 14px; background: var(--surface-2); font-size: 21px; margin-bottom: 12px; }
+.game-card h3 { margin: 0 0 5px; font-size: 14px; }
+.game-card p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+.duration { display: inline-block; margin-top: 11px; color: var(--site-primary); background: color-mix(in srgb, var(--site-secondary) 25%, transparent); border-radius: 99px; padding: 4px 8px; font-size: 10px; font-weight: 800; }
+.note { margin-top: 17px; padding: 13px 15px; border-radius: 14px; background: var(--surface-2); color: var(--muted); font-size: 11px; line-height: 1.65; }
+footer { text-align: center; color: var(--muted); font-size: 10px; letter-spacing: .08em; margin-top: 24px; }
+.view { display: none; }
+.view.active { display: block; }
+.back { border: 0; background: transparent; color: var(--muted); padding: 8px 0 15px; font-size: 12px; font-weight: 700; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: calc(22px * var(--site-radius-scale)); padding: 21px; box-shadow: 0 8px 24px #1427470C; }
+.panel h2 { margin: 0 0 7px; font-size: 20px; }
+.sub { color: var(--muted); font-size: 12px; margin: 0 0 18px; line-height: 1.6; }
+.primary-btn { width: 100%; border: 0; border-radius: 14px; background: var(--site-secondary); color: var(--site-on-secondary); padding: 14px 16px; font-weight: 900; font-size: 14px; margin-top: 14px; }
+.secondary-btn { border: 1px solid var(--line); background: var(--surface-2); color: var(--text); border-radius: 12px; padding: 11px 14px; font-weight: 700; font-size: 12px; }
+.big-stage { min-height: 210px; display: grid; place-items: center; border-radius: 17px; background: var(--surface-2); padding: 18px; text-align: center; }
+.reaction-zone { width: 100%; min-height: 174px; border: 0; border-radius: 15px; color: white; background: #B84E57; font-size: 18px; font-weight: 900; line-height: 1.5; padding: 18px; }
+.reaction-zone.ready { background: #24845D; }
+.reaction-zone.waiting { background: #B84E57; }
+.result { font-size: 32px; font-weight: 900; letter-spacing: -.04em; }
+.result small { font-size: 13px; color: var(--muted); letter-spacing: 0; }
+.quiz-progress { display: flex; gap: 5px; margin: 0 0 18px; }
+.quiz-progress i { flex: 1; height: 5px; border-radius: 99px; background: var(--surface-2); }
+.quiz-progress i.done { background: var(--site-secondary); }
+.question { font-size: 17px; line-height: 1.6; font-weight: 800; margin: 0 0 16px; }
+.answers { display: grid; gap: 9px; }
+.answer { text-align: left; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); color: var(--text); padding: 13px; font-size: 13px; font-weight: 700; }
+.answer:disabled { opacity: 1; }
+.answer.correct { border-color: var(--good); background: color-mix(in srgb, var(--good) 13%, var(--surface)); }
+.answer.wrong { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, var(--surface)); }
+.explain { min-height: 38px; margin-top: 12px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.lucky-orb { width: 124px; height: 124px; border-radius: 50%; display: grid; place-items: center; margin: 5px auto 16px; background: radial-gradient(circle at 32% 25%, #FFE4A9, #E8A84A 58%, #C77A2D); box-shadow: inset -8px -10px 20px #9C5B2528, 0 10px 24px #E8A84A35; font-size: 46px; }
+.lucky-label { text-align: center; font-size: 11px; color: var(--muted); letter-spacing: .14em; font-weight: 800; }
+.lucky-result { text-align: center; font-size: 22px; font-weight: 900; margin: 7px 0; }
+.lucky-desc { text-align: center; color: var(--muted); font-size: 12px; line-height: 1.7; min-height: 40px; }
+.hidden { display: none !important; }
+@media (min-width: 600px) { .shell { padding-top: 30px; } .hero { padding: 31px; } h1 { font-size: calc(40px * var(--site-heading-scale)); } .games { grid-template-columns: repeat(3, minmax(0, 1fr)); } .game-card { min-height: 165px; } }
+@media (prefers-reduced-motion: reduce) { *, *:before, *:after { transition: none !important; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="decor one"></div><div class="decor two"></div>
+  <main class="shell">
+    <div class="topline">
+      <div class="brand"><div class="brand-mark">▶</div><div class="brand-name">BUS TIME ARCADE</div></div>
+      <div class="tag">1–5 MIN PLAY</div>
+    </div>
+
+    <section id="home" class="view active">
+      <div class="hero">
+        <div class="eyebrow">NEXT STOP: FUN.</div>
+        <h1>Turn waiting<br>into play time.</h1>
+        <p>Play a little while you wait for the bus.<br>Quick games you can stop at any time.</p>
+        <div class="hero-foot"><span class="pulse"></span> No sign-up. No sound needed.</div>
+      </div>
+      <div class="section-head"><h2>GAME SELECT</h2><span>Choose a game to play</span></div>
+      <div class="games">
+        <button class="game-card" data-open="reaction"><div class="game-icon">⚡</div><h3>Reaction Time Challenge</h3><p>Tap as soon as the color changes. Test your reaction speed.</p><span class="duration">About 30 sec</span></button>
+        <button class="game-card" data-open="quiz"><div class="game-icon">🧠</div><h3>Quick Trivia Quiz</h3><p>Five multiple-choice questions packed with fun facts.</p><span class="duration">About 1–2 min</span></button>
+        <button class="game-card" data-open="lucky"><div class="game-icon">🍀</div><h3>Daily Lucky Draw</h3><p>Discover your lucky item and a little message for today.</p><span class="duration">About 10 sec</span></button>
+      </div>
+      <div class="note">💡 The bus is here? You can stop whenever you like. These games are made for short breaks. Stay aware of your surroundings and approaching buses.</div>
+      <footer>MAKE EVERY MINUTE COUNT.</footer>
+    </section>
+
+    <section id="reaction" class="view">
+      <button class="back" data-home>← Back to games</button>
+      <div class="panel">
+        <h2>⚡ Reaction Time Challenge</h2>
+        <p class="sub">Tap as soon as the red screen turns green. Your average time over three rounds will be recorded.</p>
+        <div class="big-stage"><button id="reactionZone" class="reaction-zone waiting">Tap Start to begin</button></div>
+        <div id="reactionStatus" class="explain" aria-live="polite">Ready when you are.</div>
+        <div id="reactionScore" class="hidden" style="text-align:center;padding-top:10px"><div class="result" id="reactionAverage">—</div><div class="sub">Average time over 3 rounds</div><button class="secondary-btn" id="reactionAgain">Try again</button></div>
+        <button id="reactionStart" class="primary-btn">Start</button>
+      </div>
+    </section>
+
+    <section id="quiz" class="view">
+      <button class="back" data-home>← Back to games</button>
+      <div class="panel">
+        <h2>🧠 Quick Trivia Quiz</h2>
+        <p class="sub">Five questions. Give it your best shot!</p>
+        <div id="quizPlay">
+          <div class="quiz-progress" id="quizProgress"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="tag" id="quizCount">QUESTION 1 / 5</div>
+          <p class="question" id="quizQuestion">Loading question…</p>
+          <div class="answers" id="quizAnswers"></div>
+          <div class="explain" id="quizExplain" aria-live="polite"></div>
+          <button id="quizNext" class="primary-btn hidden">Next question</button>
+        </div>
+        <div id="quizEnd" class="hidden" style="text-align:center;padding:20px 0">
+          <div class="lucky-orb" style="font-size:38px">🏆</div>
+          <div class="tag">YOUR RESULT</div><div class="result" id="quizFinal">0 / 5</div>
+          <p class="sub">Great job! Thanks for playing.</p>
+          <button class="primary-btn" id="quizAgain">Try again</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="lucky" class="view">
+      <button class="back" data-home>← Back to games</button>
+      <div class="panel">
+        <h2>🍀 Daily Lucky Draw</h2>
+        <p class="sub">Tap the button to reveal your lucky item for today.</p>
+        <div class="lucky-orb" id="luckyOrb">?</div>
+        <div class="lucky-label" id="luckyLabel">YOUR LUCKY ITEM</div>
+        <div class="lucky-result" id="luckyResult">What does luck have in store?</div>
+        <div class="lucky-desc" id="luckyDesc">Tap below to find out.</div>
+        <button id="luckyDraw" class="primary-btn">Try your luck</button>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+const views = [...document.querySelectorAll('.view')];
+function showView(id) { views.forEach(v => v.classList.toggle('active', v.id === id)); window.scrollTo({top:0, behavior:'smooth'}); }
+document.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => { showView(b.dataset.open); if (b.dataset.open === 'quiz') startQuiz(); }));
+document.querySelectorAll('[data-home]').forEach(b => b.addEventListener('click', () => showView('home')));
+
+// Reaction game
+const zone = document.getElementById('reactionZone');
+const startBtn = document.getElementById('reactionStart');
+const statusEl = document.getElementById('reactionStatus');
+const scoreBox = document.getElementById('reactionScore');
+let reactionState = 'idle', reactionTimer = null, startedAt = 0, attempts = [], round = 0;
+function resetReaction() {
+  clearTimeout(reactionTimer); reactionState = 'idle'; attempts = []; round = 0;
+  zone.className = 'reaction-zone waiting'; zone.textContent = 'Tap Start to begin';
+  statusEl.textContent = 'Ready when you are.'; scoreBox.classList.add('hidden'); startBtn.classList.remove('hidden'); startBtn.textContent = 'Start';
+}
+function beginRound() {
+  reactionState = 'wait'; zone.className = 'reaction-zone waiting'; zone.textContent = 'Wait for green!';
+  statusEl.textContent = `Round ${round + 1} — wait for the screen to turn green.`;
+  reactionTimer = setTimeout(() => { reactionState = 'go'; startedAt = performance.now(); zone.className = 'reaction-zone ready'; zone.textContent = 'TAP NOW!'; }, 1200 + Math.random() * 2600);
+}
+startBtn.addEventListener('click', () => { if (reactionState !== 'idle') return; startBtn.classList.add('hidden'); round = 0; beginRound(); });
+zone.addEventListener('click', () => {
+  if (reactionState === 'wait') { clearTimeout(reactionTimer); reactionState = 'idle'; zone.className = 'reaction-zone waiting'; zone.textContent = 'Too soon!'; statusEl.textContent = 'Too early! Press Start to try again.'; startBtn.classList.remove('hidden'); startBtn.textContent = 'Try again'; return; }
+  if (reactionState !== 'go') return;
+  const ms = Math.round(performance.now() - startedAt); attempts.push(ms); round++; reactionState = 'done';
+  if (round < 3) { zone.className = 'reaction-zone waiting'; zone.textContent = `${ms} ms`; statusEl.textContent = 'Time recorded! Get ready for the next round.'; setTimeout(beginRound, 850); }
+  else { const avg = Math.round(attempts.reduce((a,b)=>a+b,0)/attempts.length); zone.className = 'reaction-zone waiting'; zone.textContent = 'Challenge complete!'; statusEl.textContent = `Your times: ${attempts.join(' ms · ')} ms`; document.getElementById('reactionAverage').innerHTML = `${avg} <small>ms</small>`; scoreBox.classList.remove('hidden'); startBtn.classList.add('hidden'); }
+});
+document.getElementById('reactionAgain').addEventListener('click', resetReaction);
+
+// Quiz game
+const questions = [
+  {q:'How many hearts does an octopus have?', a:['One','Two','Three'], c:2, e:'An octopus has three hearts.'},
+  {q:'Which is the largest country by area?', a:['Canada','Russia','China'], c:1, e:'Russia is the largest country in the world by area.'},
+  {q:'About how far does light travel in one second?', a:['30,000 km','300,000 km','3,000,000 km'], c:1, e:'Light travels at about 300,000 kilometres per second.'},
+  {q:'What do giant pandas mainly eat?', a:['Bamboo','Eucalyptus','Palm leaves'], c:0, e:'Giant pandas mainly eat bamboo.'},
+  {q:'Which month has the fewest days in a normal year?', a:['January','February','April'], c:1, e:'February has 28 days, or 29 in a leap year.'},
+  {q:'Why do honeybees collect nectar from flowers?', a:['To build their hives','For food','To cool themselves'], c:1, e:'Nectar is a source of energy for bees.'},
+  {q:'Which gas makes up most of Earth’s atmosphere?', a:['Oxygen','Carbon dioxide','Nitrogen'], c:2, e:'Nitrogen makes up about 78% of Earth’s atmosphere.'}
+];
+let quizSet = [], qi = 0, qScore = 0, answered = false;
+function startQuiz() {
+  quizSet = [...questions].sort(() => Math.random() - .5).slice(0,5); qi = 0; qScore = 0; answered = false;
+  document.getElementById('quizPlay').classList.remove('hidden'); document.getElementById('quizEnd').classList.add('hidden'); renderQuestion();
+}
+function renderQuestion() {
+  const q = quizSet[qi]; answered = false;
+  document.getElementById('quizCount').textContent = `QUESTION ${qi+1} / 5`;
+  document.getElementById('quizQuestion').textContent = q.q;
+  document.getElementById('quizExplain').textContent = '';
+  document.getElementById('quizNext').classList.add('hidden');
+  document.querySelectorAll('#quizProgress i').forEach((el,i) => el.classList.toggle('done', i < qi));
+  const wrap = document.getElementById('quizAnswers'); wrap.innerHTML = '';
+  q.a.forEach((answer,i) => { const b = document.createElement('button'); b.className = 'answer'; b.textContent = `${['A','B','C'][i]}　${answer}`; b.addEventListener('click', () => chooseAnswer(i)); wrap.appendChild(b); });
+}
+function chooseAnswer(index) {
+  if (answered) return; answered = true;
+  const q = quizSet[qi], buttons = [...document.querySelectorAll('.answer')];
+  buttons.forEach((b,i) => { b.disabled = true; if (i === q.c) b.classList.add('correct'); else if (i === index) b.classList.add('wrong'); });
+  if (index === q.c) qScore++;
+  document.getElementById('quizExplain').textContent = `${index === q.c ? 'Correct!' : 'Not quite!'} ${q.e}`;
+  const next = document.getElementById('quizNext'); next.textContent = qi === 4 ? 'See results' : 'Next question'; next.classList.remove('hidden');
+}
+document.getElementById('quizNext').addEventListener('click', () => { qi++; if (qi >= 5) { document.getElementById('quizPlay').classList.add('hidden'); document.getElementById('quizEnd').classList.remove('hidden'); document.getElementById('quizFinal').textContent = `${qScore} / 5`; } else renderQuestion(); });
+document.getElementById('quizAgain').addEventListener('click', startQuiz);
+
+// Daily lucky draw
+const fortunes = [
+  {icon:'🎧', item:'Your favourite song', luck:'Excellent', desc:'An ordinary day could feel a little different. Put on a song you love.'},
+  {icon:'⭐', item:'A star', luck:'Good', desc:'Look out for a small discovery. Notice the details around you.'},
+  {icon:'🥤', item:'A refreshing drink', luck:'Fair', desc:'Take a moment to recharge. There is no need to rush.'},
+  {icon:'🟦', item:'Something blue', luck:'Excellent', desc:'Stay calm and trust your judgement today.'},
+  {icon:'📚', item:'A book or notebook', luck:'Fair', desc:'Explore something you are curious about. You might find something new.'},
+  {icon:'🍀', item:'A four-leaf clover', luck:'Good', desc:'A casual conversation could bring a pleasant surprise.'},
+  {icon:'🪙', item:'A coin', luck:'Fair', desc:'A little tidying can clear your mind. Double-check you have everything.'}
+];
+document.getElementById('luckyDraw').addEventListener('click', () => {
+  const f = fortunes[Math.floor(Math.random() * fortunes.length)];
+  document.getElementById('luckyOrb').textContent = f.icon;
+  document.getElementById('luckyLabel').textContent = 'YOUR LUCKY ITEM';
+  document.getElementById('luckyResult').textContent = `${f.luck} · ${f.item}`;
+  document.getElementById('luckyDesc').textContent = f.desc;
+  document.getElementById('luckyDraw').textContent = 'Draw again';
+});
+</script>
+</body>
+</html>
